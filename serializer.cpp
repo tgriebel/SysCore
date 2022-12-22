@@ -10,7 +10,6 @@ uint8_t* Serializer::GetPtr()
 void Serializer::SetPosition( const uint32_t index )
 {
 	this->index = 0;
-	dbgText.str( "" );
 }
 
 
@@ -18,6 +17,32 @@ void Serializer::Clear()
 {
 	memset( bytes, 0, CurrentSize() );
 	SetPosition( 0 );
+}
+
+
+bool Serializer::Grow( const uint32_t sizeInBytes )
+{
+	if( sizeInBytes == 0 ) {
+		return false;
+	}
+
+	const uint64_t chkSize = byteCount + static_cast<uint64_t>( sizeInBytes );
+	if( chkSize >= static_cast<uint64_t>( MaxByteCount ) ) {
+		return false;
+	}
+
+	const uint32_t oldCount = byteCount;
+	byteCount += sizeInBytes;
+
+	uint8_t* newBytes = new uint8_t[ byteCount ];
+	if( bytes != nullptr ) {
+		memcpy( newBytes, bytes, oldCount );
+		delete[] bytes;
+	}
+	memset( newBytes + oldCount, 0, sizeInBytes );
+
+	bytes = newBytes;
+	return true;
 }
 
 
@@ -36,6 +61,12 @@ uint32_t Serializer::BufferSize() const
 bool Serializer::CanStore( const uint32_t sizeInBytes ) const
 {
 	return ( CurrentSize() + sizeInBytes <= BufferSize() );
+}
+
+
+void Serializer::SetEndian( serializeEndian_t endianMode )
+{
+	endian = endianMode;
 }
 
 
@@ -91,196 +122,42 @@ bool Serializer::FindLabel( const char name[ serializerHeader_t::MaxNameLength ]
 }
 
 
-bool Serializer::NextBool( bool& v )
+bool Serializer::Next( ref_t type )
 {
-	return Next8b( *reinterpret_cast<uint8_t*>( &v ) );
-}
-
-bool Serializer::NextChar( int8_t& v )
-{
-	return Next8b( *reinterpret_cast<uint8_t*>( &v ) );
-}
-
-bool Serializer::NextUchar( uint8_t& v )
-{
-	return Next8b( v );
-}
-
-bool Serializer::NextShort( int16_t& v )
-{
-	return Next16b( *reinterpret_cast<uint16_t*>( &v ) );
-}
-
-bool Serializer::NextUshort( uint16_t& v )
-{
-	return Next16b( v );
-}
-
-bool Serializer::NextInt( int32_t& v )
-{
-	return Next32b( *reinterpret_cast<uint32_t*>( &v ) );
-}
-
-bool Serializer::NextUint( uint32_t& v )
-{
-	return Next32b( v );
-}
-
-bool Serializer::NextLong( int64_t& v )
-{
-	return Next64b( *reinterpret_cast<uint64_t*>( &v ) );
-}
-
-bool Serializer::NextUlong( uint64_t& v )
-{
-	return Next64b( v );
-}
-
-bool Serializer::NextFloat( float& v )
-{
-	return Next32b( *reinterpret_cast<uint32_t*>( &v ) );
-}
-
-bool Serializer::NextDouble( double& v )
-{
-	return Next64b( *reinterpret_cast<uint64_t*>( &v ) );
-}
-
-
-bool Serializer::Next8b( uint8_t& b8 )
-{
-	const uint32_t size = sizeof( b8 );
-	if ( !CanStore( size ) ) {
+	if ( !CanStore( type.size ) ) {
 		assert( 0 ); // TODO: remove
 		return false;
 	}
 
-	if ( mode == serializeMode_t::LOAD ) {
-		b8 = bytes[ index ];
-	}
-	else {
-		bytes[ index ] = b8;
-	}
-	index += size;
-
-#if DBG_SERIALIZER
-	dbgText << (int)b8 << "\n";
-#endif
-
-	return true;
-}
-
-
-bool Serializer::Next16b( uint16_t& b16 )
-{
-	const uint32_t size = sizeof( b16 );
-	if ( !CanStore( size ) ) {
-		assert( 0 ); // TODO: remove
-		return false;
-	}
-
-	serializerTuple_t t = {};
 	if ( mode == serializeMode_t::LOAD )
 	{
-		t.b8.e[ 0 ] = bytes[ index + 0 ];
-		t.b8.e[ 1 ] = bytes[ index + 1 ];
-		b16 = t.b16.e[ 0 ];
+		for ( uint32_t i = 0; i < type.size; ++i )
+		{
+			if ( endian == serializeEndian_t::BIG ) {
+				type.convert.u8.e[ type.size - 1 - i ] = bytes[ index ];
+			} else {
+				type.convert.u8.e[ i ] = bytes[ index ];
+			}
+			++index;
+		}
 	}
-	else
+	else if( mode == serializeMode_t::STORE )
 	{
-		t.b16.e[ 0 ] = b16;
-		bytes[ index + 0 ] = t.b8.e[ 0 ];
-		bytes[ index + 1 ] = t.b8.e[ 1 ];
+		for ( uint32_t i = 0; i < type.size; ++i )
+		{
+			if ( endian == serializeEndian_t::BIG ) {
+				bytes[ index ] = type.convert.u8.e[ type.size - 1 - i ];
+			} else {
+				bytes[ index ] = type.convert.u8.e[ i ];
+			}
+			++index;
+		}
 	}
-	index += size;
-
-#if DBG_SERIALIZER
-	dbgText << b16 << "\n";
-#endif
-
 	return true;
 }
 
 
-bool Serializer::Next32b( uint32_t& b32 )
-{
-	const uint32_t size = sizeof( b32 );
-	if ( !CanStore( size ) ) {
-		assert( 0 ); // TODO: remove
-		return false;
-	}
-
-	serializerTuple_t t = {};
-	if ( mode == serializeMode_t::LOAD )
-	{
-		t.b8.e[ 0 ] = bytes[ index + 0 ];
-		t.b8.e[ 1 ] = bytes[ index + 1 ];
-		t.b8.e[ 2 ] = bytes[ index + 2 ];
-		t.b8.e[ 3 ] = bytes[ index + 3 ];
-		b32 = t.b32.e[ 0 ];
-	}
-	else
-	{
-		t.b32.e[ 0 ] = b32;
-		bytes[ index + 0 ] = t.b8.e[ 0 ];
-		bytes[ index + 1 ] = t.b8.e[ 1 ];
-		bytes[ index + 2 ] = t.b8.e[ 2 ];
-		bytes[ index + 3 ] = t.b8.e[ 3 ];
-	}
-	index += size;
-
-#if DBG_SERIALIZER
-	dbgText << b32 << "\n";
-#endif
-
-	return true;
-}
-
-
-bool Serializer::Next64b( uint64_t& b64 )
-{
-	const uint32_t size = sizeof( b64 );
-	if ( !CanStore( size ) ) {
-		assert( 0 ); // TODO: remove
-		return false;
-	}
-
-	serializerTuple_t t = {};
-	if ( mode == serializeMode_t::LOAD )
-	{
-		t.b8.e[ 0 ] = bytes[ index + 0 ];
-		t.b8.e[ 1 ] = bytes[ index + 1 ];
-		t.b8.e[ 2 ] = bytes[ index + 2 ];
-		t.b8.e[ 3 ] = bytes[ index + 3 ];
-		t.b8.e[ 4 ] = bytes[ index + 4 ];
-		t.b8.e[ 5 ] = bytes[ index + 5 ];
-		t.b8.e[ 6 ] = bytes[ index + 6 ];
-		t.b8.e[ 7 ] = bytes[ index + 7 ];
-		b64 = t.b64;
-	}
-	else
-	{
-		t.b64 = b64;
-		bytes[ index + 0 ] = t.b8.e[ 0 ];
-		bytes[ index + 1 ] = t.b8.e[ 1 ];
-		bytes[ index + 2 ] = t.b8.e[ 2 ];
-		bytes[ index + 3 ] = t.b8.e[ 3 ];
-		bytes[ index + 4 ] = t.b8.e[ 4 ];
-		bytes[ index + 5 ] = t.b8.e[ 5 ];
-		bytes[ index + 6 ] = t.b8.e[ 6 ];
-		bytes[ index + 7 ] = t.b8.e[ 7 ];
-	}
-	index += size;
-
-#if DBG_SERIALIZER
-	dbgText << b64 << "\n";
-#endif
-
-	return true;
-}
-
-
-bool Serializer::NextArray( uint8_t* b8, uint32_t sizeInBytes )
+bool Serializer::NextArray( uint8_t* u8, uint32_t sizeInBytes )
 {
 	if ( !CanStore( sizeInBytes ) ) {
 		assert( 0 ); // TODO: remove
@@ -288,24 +165,26 @@ bool Serializer::NextArray( uint8_t* b8, uint32_t sizeInBytes )
 	}
 
 	if ( mode == serializeMode_t::LOAD ) {
-		//	memcpy( b8, bytes + index, sizeInBytes );
 		for ( uint32_t i = 0; i < sizeInBytes; ++i )
 		{
-			b8[ i ] = bytes[ index ];
-			dbgText << b8[ i ] << " ";
+			if ( endian == serializeEndian_t::BIG ) {
+				u8[ sizeInBytes - 1 - i ] = bytes[ index ];
+			} else {
+				u8[ i ] = bytes[ index ];
+			}
 			++index;
 		}
 	}
 	else {
-		//	memcpy( bytes + index, b8, sizeInBytes );
 		for ( uint32_t i = 0; i < sizeInBytes; ++i )
 		{
-			bytes[ index ] = b8[ i ];
-			dbgText << bytes[ index ] << " ";
+			if ( endian == serializeEndian_t::BIG ) {
+				bytes[ index ] = u8[ sizeInBytes - 1 - i ];
+			} else {
+				bytes[ index ] = u8[ i ];
+			}
 			++index;
 		}
 	}
-	//index += sizeInBytes;
-
 	return true;
 }

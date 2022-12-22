@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string>
 #include <sstream>
+#include <algorithm>
 
 #define DBG_SERIALIZER 0
 
@@ -11,26 +12,144 @@ enum class serializeMode_t
 	LOAD,
 };
 
-union serializerTuple_t
+enum class serializeEndian_t
 {
-	struct b8_t
-	{
-		uint8_t		e[ 8 ];
-	} b8;
-
-	struct b16_t
-	{
-		uint16_t	e[ 4 ];
-	} b16;
-
-	struct b32_t
-	{
-		uint32_t	e[ 2 ];
-	} b32;
-
-	uint64_t b64;
+	LITTLE,
+	BIG,
 };
 
+union Convert
+{
+	Convert() : u64(0) {}
+	Convert( const int8_t value )	: i8( value ) {}
+	Convert( const uint8_t value )	: u8( value ) {}
+	Convert( const bool value )		: b8( value ) {}
+
+	Convert( const int16_t value )	: i16( value ) {}
+	Convert( const uint16_t value )	: u16( value ) {}
+
+	Convert( const int32_t value )	: i32( value ) {}
+	Convert( const uint32_t value )	: u32( value ) {}
+	Convert( const float value )	: f32( value ) {}
+
+	Convert( const int64_t value )	: i64( value ) {}
+	Convert( const uint64_t value )	: u64( value ) {}
+	Convert( const double value )	: d64( value ) {}
+
+	struct i8_t
+	{
+		i8_t( const int8_t value ) {
+			e[0] = value;
+			e[1] = 0;
+			e[2] = 0;
+			e[3] = 0;
+			e[4] = 0;
+			e[5] = 0;
+			e[6] = 0;
+			e[7] = 0;
+		}
+		int8_t e[ 8 ];
+	} i8;
+
+	struct u8_t
+	{
+		u8_t( const uint8_t value ) {
+			e[0] = value;
+			e[1] = 0;
+			e[2] = 0;
+			e[3] = 0;
+			e[4] = 0;
+			e[5] = 0;
+			e[6] = 0;
+			e[7] = 0;
+		}
+		uint8_t e[8];
+	} u8;
+
+	struct b8_t
+	{
+		b8_t( const bool value ) {
+			e[0] = value;
+			e[1] = 0;
+			e[2] = 0;
+			e[3] = 0;
+			e[4] = 0;
+			e[5] = 0;
+			e[6] = 0;
+			e[7] = 0;
+		}
+		bool e[8];
+	} b8;
+
+	struct i16_t
+	{
+		i16_t( const int16_t value ) {
+			e[0] = value;
+			e[1] = 0;
+			e[2] = 0;
+			e[3] = 0;
+		}
+		int16_t e[4];
+	} i16;
+
+	struct u16_t
+	{
+		u16_t( const uint16_t value ) {
+			e[0] = value;
+			e[1] = 0;
+			e[2] = 0;
+			e[3] = 0;
+		}
+		uint16_t e[4];
+	} u16;
+
+	struct i32_t
+	{
+		i32_t( const int32_t value ) {
+			e[0] = value;
+			e[1] = 0;
+		}
+		int32_t e[2];
+	} i32;
+
+	struct u32_t
+	{
+		u32_t( const uint32_t value ) {
+			e[0] = value;
+			e[1] = 0;
+		}
+		uint32_t e[2];
+	} u32;
+
+	struct f32_t
+	{
+		f32_t( const float value ) {
+			e[0] = value;
+			e[1] = 0;
+		}
+		float e[2];
+	} f32;
+
+	int64_t		i64;
+	uint64_t	u64;
+	double		d64;
+};
+
+struct ref_t
+{
+	ref_t() = delete;
+	ref_t( Convert& _convert, const uint32_t _size ) : convert( _convert ), size( _size ) {  }
+	ref_t( const ref_t& ref ) : convert( ref.convert ), size( ref.size ) {}
+
+	Convert&	convert;
+	uint32_t	size;
+};
+
+template<typename T>
+ref_t Ref( T& attrib )
+{
+	return ref_t( reinterpret_cast<Convert&>( attrib ), sizeof( attrib ) );
+}
 
 struct serializerHeader_t
 {
@@ -48,16 +167,22 @@ struct serializerHeader_t
 	uint32_t	sectionCount;
 };
 
-
 class Serializer
 {
 public:
 
+	static const uint32_t MaxByteCount = 1073741824;
+
 	Serializer( const uint32_t _sizeInBytes, serializeMode_t _mode )
 	{
-		bytes = new uint8_t[ _sizeInBytes ];
-		byteCount = _sizeInBytes;
+		byteCount = std::min( MaxByteCount, _sizeInBytes );
+		if( byteCount > 0 ) {
+			bytes = new uint8_t[ _sizeInBytes ];
+		} else {
+			bytes = nullptr;
+		}
 		mode = _mode;
+		endian = serializeEndian_t::LITTLE;
 		Clear();
 	}
 
@@ -75,43 +200,29 @@ public:
 	Serializer( const Serializer& ) = delete;
 	Serializer operator=( const Serializer& ) = delete;
 
-	uint8_t* GetPtr();
+	uint8_t*			GetPtr();
 	void				SetPosition( const uint32_t index );
 	void				Clear();
+	bool				Grow( const uint32_t sizeInBytes );
 	uint32_t			CurrentSize() const;
 	uint32_t			BufferSize() const;
 	bool				CanStore( const uint32_t sizeInBytes ) const;
-	void				SetMode( serializeMode_t mode );
+	void				SetEndian( serializeEndian_t endianMode );
+	void				SetMode( serializeMode_t serializeMode );
 	serializeMode_t		GetMode() const;
 
 	uint32_t			NewLabel( const char name[ serializerHeader_t::MaxNameLength ] );
 	void				EndLabel( const char name[ serializerHeader_t::MaxNameLength ] );
 	bool				FindLabel( const char name[ serializerHeader_t::MaxNameLength ], serializerHeader_t::section_t** outSection );
 
-	bool				NextBool( bool& v );
-	bool				NextChar( int8_t& v );
-	bool				NextUchar( uint8_t& v );
-	bool				NextShort( int16_t& v );
-	bool				NextUshort( uint16_t& v );
-	bool				NextInt( int32_t& v );
-	bool				NextUint( uint32_t& v );
-	bool				NextLong( int64_t& v );
-	bool				NextUlong( uint64_t& v );
-	bool				NextFloat( float& v );
-	bool				NextDouble( double& v );
-
-	bool				Next8b( uint8_t& b8 );
-	bool				Next16b( uint16_t& b16 );
-	bool				Next32b( uint32_t& b32 );
-	bool				Next64b( uint64_t& b64 );
-	bool				NextArray( uint8_t* b8, uint32_t sizeInBytes );
+	bool				Next( ref_t type );
+	bool				NextArray( uint8_t* u8, uint32_t sizeInBytes );
 
 private:
 	serializerHeader_t	header;
-	uint8_t* bytes;
+	uint8_t*			bytes;
 	uint32_t			byteCount;
 	uint32_t			index;
 	serializeMode_t		mode;
-public: // FIXME: temp
-	std::stringstream	dbgText;
+	serializeEndian_t	endian;
 };
