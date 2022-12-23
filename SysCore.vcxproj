@@ -140,6 +140,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="serializer.h" />
+    <ClInclude Include="smartPointer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="serializer.cpp" />

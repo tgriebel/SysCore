@@ -1,7 +1,5 @@
 #pragma once
-#include <stdio.h>
 #include <string>
-#include <sstream>
 #include <algorithm>
 
 #define DBG_SERIALIZER 0
@@ -169,6 +167,8 @@ struct serializerHeader_t
 
 class Serializer
 {
+private:
+	void Next( ref_t type );
 public:
 
 	static const uint32_t MaxByteCount = 1073741824;
@@ -203,20 +203,32 @@ public:
 	uint8_t*			GetPtr();
 	void				SetPosition( const uint32_t index );
 	void				Clear();
+	bool				ReadFile( const std::string& filename );
+	bool				WriteFile( const std::string& filename );
 	bool				Grow( const uint32_t sizeInBytes );
 	uint32_t			CurrentSize() const;
 	uint32_t			BufferSize() const;
 	bool				CanStore( const uint32_t sizeInBytes ) const;
 	void				SetEndian( serializeEndian_t endianMode );
-	void				SetMode( serializeMode_t serializeMode );
+	bool				SetMode( serializeMode_t serializeMode );
 	serializeMode_t		GetMode() const;
 
 	uint32_t			NewLabel( const char name[ serializerHeader_t::MaxNameLength ] );
 	void				EndLabel( const char name[ serializerHeader_t::MaxNameLength ] );
 	bool				FindLabel( const char name[ serializerHeader_t::MaxNameLength ], serializerHeader_t::section_t** outSection );
 
-	bool				Next( ref_t type );
-	bool				NextArray( uint8_t* u8, uint32_t sizeInBytes );
+	inline void			Next( int8_t& value )	{ Next( Ref( value ) ); }
+	inline void			Next( uint8_t& value )	{ Next( Ref( value ) ); }
+	inline void			Next( bool& value )		{ Next( Ref( value ) ); }
+	inline void			Next( int16_t& value )	{ Next( Ref( value ) ); }
+	inline void			Next( uint16_t& value )	{ Next( Ref( value ) ); }
+	inline void			Next( int32_t& value )	{ Next( Ref( value ) ); }
+	inline void			Next( uint32_t& value )	{ Next( Ref( value ) ); }
+	inline void			Next( float& value )	{ Next( Ref( value ) ); }
+	void				Next( int64_t& value )	{ Next( Ref( value ) ); }
+	void				Next( uint64_t& value ) { Next( Ref( value ) ); }
+	void				Next( double& value )	{ Next( Ref( value ) ); }
+	void				NextArray( uint8_t* u8, uint32_t sizeInBytes );
 
 private:
 	serializerHeader_t	header;

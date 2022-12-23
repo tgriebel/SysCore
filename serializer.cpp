@@ -1,3 +1,8 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <stdio.h>
+#include <sstream>
 #include "serializer.h"
 #include "assert.h"
 
@@ -17,6 +22,43 @@ void Serializer::Clear()
 {
 	memset( bytes, 0, CurrentSize() );
 	SetPosition( 0 );
+}
+
+
+bool Serializer::ReadFile( const std::string& filename )
+{
+	std::ifstream file( filename, std::ios::in | std::ios::ate | std::ios::binary );
+
+	if ( !file.is_open() ) {
+		return false;
+	}
+
+	uint32_t fileSize = static_cast<uint32_t>( file.tellg() );
+	if( CanStore( fileSize ) == false ) {
+		if( Grow( fileSize - byteCount ) == false ) {
+			return false;
+		}
+	}
+
+	file.seekg( 0 );
+	file.read( reinterpret_cast<char*>( bytes ), fileSize );
+	file.close();
+
+	return true;
+}
+
+
+bool Serializer::WriteFile( const std::string& filename )
+{
+	std::ofstream file( filename, std::ios::out | std::ios::trunc | std::ios::binary );
+
+	if ( !file.is_open() ) {
+		return false;
+	}
+	file.write( reinterpret_cast<char*>(bytes), byteCount );
+	file.close();
+
+	return true;
 }
 
 
@@ -70,9 +112,14 @@ void Serializer::SetEndian( serializeEndian_t endianMode )
 }
 
 
-void Serializer::SetMode( serializeMode_t serializeMode )
+bool Serializer::SetMode( serializeMode_t serializeMode )
 {
+	if( index > 0 ) {
+		assert(0); // FIXME: temp
+		return false;
+	}
 	mode = serializeMode;
+	return true;
 }
 
 
@@ -122,11 +169,10 @@ bool Serializer::FindLabel( const char name[ serializerHeader_t::MaxNameLength ]
 }
 
 
-bool Serializer::Next( ref_t type )
+void Serializer::Next( ref_t type )
 {
 	if ( !CanStore( type.size ) ) {
-		assert( 0 ); // TODO: remove
-		return false;
+		throw std::runtime_error( "Serializer is full." );
 	}
 
 	if ( mode == serializeMode_t::LOAD )
@@ -153,15 +199,13 @@ bool Serializer::Next( ref_t type )
 			++index;
 		}
 	}
-	return true;
 }
 
 
-bool Serializer::NextArray( uint8_t* u8, uint32_t sizeInBytes )
+void Serializer::NextArray( uint8_t* u8, uint32_t sizeInBytes )
 {
 	if ( !CanStore( sizeInBytes ) ) {
-		assert( 0 ); // TODO: remove
-		return false;
+		throw std::runtime_error( "Serializer is full." );
 	}
 
 	if ( mode == serializeMode_t::LOAD ) {
@@ -186,5 +230,4 @@ bool Serializer::NextArray( uint8_t* u8, uint32_t sizeInBytes )
 			++index;
 		}
 	}
-	return true;
 }
