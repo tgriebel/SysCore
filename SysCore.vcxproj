@@ -141,10 +141,12 @@
   <ItemGroup>
     <ClInclude Include="serializer.h" />
     <ClInclude Include="smartPointer.h" />
+    <ClInclude Include="timer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="serializer.cpp" />
     <ClCompile Include="SysCore.cpp" />
+    <ClCompile Include="timer.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

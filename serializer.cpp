@@ -55,7 +55,7 @@ bool Serializer::WriteFile( const std::string& filename )
 	if ( !file.is_open() ) {
 		return false;
 	}
-	file.write( reinterpret_cast<char*>(bytes), byteCount );
+	file.write( reinterpret_cast<char*>(bytes), CurrentSize() );
 	file.close();
 
 	return true;
