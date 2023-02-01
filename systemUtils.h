@@ -22,14 +22,20 @@
 */
 
 #pragma once
+#include <string>
 
-#include <cstdint>
+static inline void SplitFileName( const std::string path, std::string& fileName, std::string& ext )
+{
+	std::size_t extPos = path.find_last_of( "." );
 
-const uint32_t KB_1 = 1024;
-const uint32_t MB_1 = 1024 * KB_1;
-const uint32_t GB_1 = 1024 * MB_1;
+	fileName = path.substr( 0, extPos );
+	ext = path.substr( extPos + 1, path.length() );
+}
 
-#define KB( N ) ( N * KB_1 )
-#define MB( N ) ( N * MB_1 )
-#define GB( N ) ( N * GB_1 )
-#define COUNTARRAY( ary ) static_cast<uint32_t>( sizeof( ary ) / sizeof( ary[0] ) )
+
+static inline void SplitPath( const std::string path, std::string& directory, std::string& fileName )
+{
+	std::size_t dirPos = path.find_last_of( "\\" ) + 1;
+	directory = path.substr( 0, dirPos );
+	fileName = path.substr( dirPos, path.length() );
+}

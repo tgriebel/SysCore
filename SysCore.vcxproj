@@ -143,6 +143,7 @@
     <ClInclude Include="jsmn.h" />
     <ClInclude Include="serializer.h" />
     <ClInclude Include="smartPointer.h" />
+    <ClInclude Include="systemUtils.h" />
     <ClInclude Include="timer.h" />
   </ItemGroup>
   <ItemGroup>

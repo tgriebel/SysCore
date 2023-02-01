@@ -44,5 +44,8 @@
     <ClInclude Include="jsmn.h">
       <Filter>external</Filter>
     </ClInclude>
+    <ClInclude Include="systemUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
