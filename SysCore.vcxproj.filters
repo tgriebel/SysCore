@@ -16,6 +16,9 @@
     <Filter Include="external">
       <UniqueIdentifier>{d0243cfd-11f0-41f4-ae68-03f229517506}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Containers">
+      <UniqueIdentifier>{31ed0250-be4c-4df2-8fb3-e84ccf71116e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="serializer.cpp">
@@ -46,6 +49,9 @@
     </ClInclude>
     <ClInclude Include="systemUtils.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="array.h">
+      <Filter>Containers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
