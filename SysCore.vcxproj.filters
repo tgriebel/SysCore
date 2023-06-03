@@ -53,5 +53,11 @@
     <ClInclude Include="array.h">
       <Filter>Containers</Filter>
     </ClInclude>
+    <ClInclude Include="refCounter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ref.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -20,7 +20,7 @@ public:
 		this->instances = new refCount_t( 1 );
 	}
 
-	ref_t( const ptr_t& handle )
+	ref_t( const ref_t& handle )
 	{
 		if ( handle.IsValid() )
 		{
@@ -61,11 +61,11 @@ public:
 		return *this;
 	}
 
-	bool operator==( const ptr_t& rhs ) const {
+	bool operator==( const ref_t& rhs ) const {
 		return ( object == rhs.object );
 	}
 
-	bool operator!=( const ptr_t& rhs ) const {
+	bool operator!=( const ref_t& rhs ) const {
 		return ( object != rhs.object );
 	}
 
@@ -77,7 +77,7 @@ public:
 		return Get();
 	}
 
-	void Reset() {
+	void Release() {
 		this->~ptr_t();
 	}
 

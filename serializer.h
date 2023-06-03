@@ -156,21 +156,6 @@ union Convert
 	double		d64;
 };
 
-struct ref_t
-{
-	ref_t() = delete;
-	ref_t( Convert& _convert, const uint32_t _size ) : convert( _convert ), size( _size ) {  }
-	ref_t( const ref_t& ref ) : convert( ref.convert ), size( ref.size ) {}
-
-	Convert&	convert;
-	uint32_t	size;
-};
-
-template<typename T>
-ref_t Ref( T& attrib )
-{
-	return ref_t( reinterpret_cast<Convert&>( attrib ), sizeof( attrib ) );
-}
 
 struct serializerHeader_t
 {
@@ -191,7 +176,23 @@ struct serializerHeader_t
 class Serializer
 {
 private:
-	void Next( ref_t type );
+	struct ref_t
+	{
+		ref_t() = delete;
+		ref_t( Convert& _convert, const uint32_t _size ) : convert( _convert ), size( _size ) {  }
+		ref_t( const ref_t& ref ) : convert( ref.convert ), size( ref.size ) {}
+
+		Convert& convert;
+		uint32_t	size;
+	};
+
+	template<typename T>
+	ref_t Ref( T& attrib )
+	{
+		return ref_t( reinterpret_cast<Convert&>( attrib ), sizeof( attrib ) );
+	}
+
+	void Next( Serializer::ref_t type );
 public:
 
 	static const uint32_t MaxByteCount = 1073741824;

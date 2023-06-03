@@ -102,7 +102,7 @@ public:
 		return Get();
 	}
 
-	void Reset() {
+	void Release() {
 		this->~ptr_t();
 	}
 

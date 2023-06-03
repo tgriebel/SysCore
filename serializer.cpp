@@ -192,7 +192,7 @@ bool Serializer::FindLabel( const char name[ serializerHeader_t::MaxNameLength ]
 }
 
 
-void Serializer::Next( ref_t type )
+void Serializer::Next( Serializer::ref_t type )
 {
 	if ( !CanStore( type.size ) ) {
 		throw std::runtime_error( "Serializer is full." );
