@@ -33,3 +33,34 @@ const uint32_t GB_1 = 1024 * MB_1;
 #define MB( N ) ( N * MB_1 )
 #define GB( N ) ( N * GB_1 )
 #define COUNTARRAY( ary ) static_cast<uint32_t>( sizeof( ary ) / sizeof( ary[0] ) )
+
+#define DEFINE_ENUM_OPERATORS( enumType, intType )														\
+inline void operator|=( enumType& lhs, const enumType rhs )												\
+{																										\
+	lhs = static_cast<enumType>( static_cast<intType>( lhs ) | static_cast<intType>( rhs ) );			\
+}																										\
+																										\
+inline void operator&=( enumType& lhs, const enumType rhs )												\
+{																										\
+	lhs = static_cast<enumType>( static_cast<intType>( lhs ) & static_cast<intType>( rhs ) );			\
+}																										\
+																										\
+inline enumType operator&( const enumType lhs, const enumType rhs )										\
+{																										\
+	return static_cast<enumType>( static_cast<intType>( lhs ) & static_cast<intType>( rhs ) );			\
+}																										\
+																										\
+inline enumType operator|( const enumType lhs, const enumType rhs )										\
+{																										\
+	return static_cast<enumType>( static_cast<intType>( lhs ) | static_cast<intType>( rhs ) );			\
+}																										\
+																										\
+inline enumType operator>>( const enumType lhs, const enumType rhs )									\
+{																										\
+	return static_cast<enumType>( static_cast<intType>( lhs ) >> static_cast<intType>( rhs ) );			\
+}																										\
+																										\
+inline enumType operator<<( const enumType lhs, const enumType rhs )									\
+{																										\
+	return static_cast<enumType>( static_cast<intType>( lhs ) << static_cast<intType>( rhs ) );			\
+}
