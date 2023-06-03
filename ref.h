@@ -14,9 +14,9 @@ public:
 		this->instances = nullptr;
 	};
 
-	ref_t( const T& obj )
+	ref_t( const T* obj )
 	{
-		this->object = new T( obj );
+		this->object = obj;
 		this->instances = new refCount_t( 1 );
 	}
 
