@@ -51,15 +51,17 @@ public:
 	}
 
 
-	inline void Append( const T& element )
+	inline bool Append( const T& element )
 	{
 		const uint32_t newCount = ( count + 1 );
 		if ( newCount <= N )
 		{
 			elements[ newCount - 1 ] = element;
 			count = newCount;
+			return true;
 		} else {
 			assert( 0 );
+			return false;
 		}
 	}
 
