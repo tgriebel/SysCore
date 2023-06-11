@@ -36,12 +36,37 @@ public:
 	}
 
 
-	inline void Resize( unsigned int newCount )
+	inline void Reset()
+	{
+		count = 0;
+	}
+
+
+	inline void Resize( uint32_t newCount )
 	{
 		if( newCount > N ) {
 			newCount = N;
 		}
 		count = newCount;
+	}
+
+
+	inline void Append( const T& element )
+	{
+		const uint32_t newCount = ( count + 1 );
+		if ( newCount <= N )
+		{
+			elements[ newCount - 1 ] = element;
+			count = newCount;
+		} else {
+			assert( 0 );
+		}
+	}
+
+
+	inline T* Ptr()
+	{
+		return &elements[ 0 ];
 	}
 
 
