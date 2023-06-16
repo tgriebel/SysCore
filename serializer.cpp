@@ -37,13 +37,15 @@ uint8_t* Serializer::GetPtr()
 
 void Serializer::SetPosition( const uint32_t index )
 {
-	this->index = 0;
+	this->index = index;
 }
 
 
-void Serializer::Clear()
+void Serializer::Clear( const bool clearMemory )
 {
-	memset( bytes, 0, CurrentSize() );
+	if( clearMemory ) {
+		memset( bytes, 0, CurrentSize() );
+	}
 	SetPosition( 0 );
 }
 
@@ -194,7 +196,7 @@ bool Serializer::FindLabel( const char name[ serializerHeader_t::MaxNameLength ]
 
 void Serializer::Next( Serializer::ref_t type )
 {
-	if ( !CanStore( type.size ) ) {
+	if ( CanStore( type.size ) == false ) {
 		throw std::runtime_error( "Serializer is full." );
 	}
 
@@ -227,7 +229,7 @@ void Serializer::Next( Serializer::ref_t type )
 
 void Serializer::NextArray( uint8_t* u8, uint32_t sizeInBytes )
 {
-	if ( !CanStore( sizeInBytes ) ) {
+	if ( CanStore( sizeInBytes ) == false ) {
 		throw std::runtime_error( "Serializer is full." );
 	}
 

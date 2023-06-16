@@ -226,7 +226,7 @@ public:
 
 	uint8_t*			GetPtr();
 	void				SetPosition( const uint32_t index );
-	void				Clear();
+	void				Clear( const bool clearMemory = true );
 	bool				ReadFile( const std::string& filename );
 	bool				WriteFile( const std::string& filename );
 	bool				Grow( const uint32_t sizeInBytes );
@@ -262,3 +262,15 @@ private:
 	serializeMode_t		mode;
 	serializeEndian_t	endian;
 };
+
+template<class T>
+void SerializeStruct( Serializer* s, T& data )
+{
+	s->NextArray( reinterpret_cast<uint8_t*>( &data ), sizeof( T ) );
+}
+
+template<class T>
+void SerializeArray( Serializer* s, T data[], const uint32_t elementCount )
+{
+	s->NextArray( reinterpret_cast<uint8_t*>( data ), sizeof( T ) * elementCount );
+}
