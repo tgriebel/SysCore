@@ -201,10 +201,13 @@ private:
 		return ref_t( reinterpret_cast<Convert&>( attrib ), sizeof( attrib ) );
 	}
 
-	void Next( Serializer::ref_t type );
+	void		Next( Serializer::ref_t type );
+	uint32_t	ApplyEndian( const uint32_t index ) const;
+
 public:
 
 	static const uint32_t MaxByteCount = 1073741824;
+	static const uint32_t WordLength = 4;
 
 	Serializer( const uint32_t _sizeInBytes, serializeMode_t _mode )
 	{
@@ -247,22 +250,22 @@ public:
 	serializeMode_t			GetMode() const;
 	serializeStatus_t		Status() const;
 
-	uint32_t			NewLabel( const char name[ serializerHeader_t::MaxNameLength ] );
-	void				EndLabel( const char name[ serializerHeader_t::MaxNameLength ] );
-	bool				FindLabel( const char name[ serializerHeader_t::MaxNameLength ], serializerHeader_t::section_t** outSection );
+	uint32_t				NewLabel( const char name[ serializerHeader_t::MaxNameLength ] );
+	void					EndLabel( const char name[ serializerHeader_t::MaxNameLength ] );
+	bool					FindLabel( const char name[ serializerHeader_t::MaxNameLength ], serializerHeader_t::section_t** outSection );
 
-	inline void			Next( int8_t& value )	{ Next( Ref( value ) ); }
-	inline void			Next( uint8_t& value )	{ Next( Ref( value ) ); }
-	inline void			Next( bool& value )		{ Next( Ref( value ) ); }
-	inline void			Next( int16_t& value )	{ Next( Ref( value ) ); }
-	inline void			Next( uint16_t& value )	{ Next( Ref( value ) ); }
-	inline void			Next( int32_t& value )	{ Next( Ref( value ) ); }
-	inline void			Next( uint32_t& value )	{ Next( Ref( value ) ); }
-	inline void			Next( float& value )	{ Next( Ref( value ) ); }
-	void				Next( int64_t& value )	{ Next( Ref( value ) ); }
-	void				Next( uint64_t& value ) { Next( Ref( value ) ); }
-	void				Next( double& value )	{ Next( Ref( value ) ); }
-	void				NextArray( uint8_t* u8, uint32_t sizeInBytes );
+	inline void				Next( int8_t& value )	{ Next( Ref( value ) ); }
+	inline void				Next( uint8_t& value )	{ Next( Ref( value ) ); }
+	inline void				Next( bool& value )		{ Next( Ref( value ) ); }
+	inline void				Next( int16_t& value )	{ Next( Ref( value ) ); }
+	inline void				Next( uint16_t& value )	{ Next( Ref( value ) ); }
+	inline void				Next( int32_t& value )	{ Next( Ref( value ) ); }
+	inline void				Next( uint32_t& value )	{ Next( Ref( value ) ); }
+	inline void				Next( float& value )	{ Next( Ref( value ) ); }
+	void					Next( int64_t& value )	{ Next( Ref( value ) ); }
+	void					Next( uint64_t& value ) { Next( Ref( value ) ); }
+	void					Next( double& value )	{ Next( Ref( value ) ); }
+	void					NextArray( uint8_t* u8, uint32_t sizeInBytes );
 
 private:
 	serializerHeader_t		m_header;

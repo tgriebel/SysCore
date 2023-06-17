@@ -147,7 +147,6 @@ bool Serializer::SetMode( serializeMode_t serializeMode )
 {
 	if( m_index > 0 )
 	{
-		assert(0); // FIXME: temp
 		m_code = serializeStatus_t::MODE_ERROR;
 		return false;
 	}
@@ -165,6 +164,21 @@ serializeMode_t Serializer::GetMode() const
 serializeStatus_t Serializer::Status() const
 {
 	return m_code;
+}
+
+
+uint32_t Serializer::ApplyEndian( const uint32_t index ) const
+{
+	if ( m_endian == serializeEndian_t::BIG )
+	{
+		const uint32_t wordBase = ( m_index / WordLength ) * WordLength;
+		const uint32_t byteOffset = ( WordLength - 1 ) - ( m_index % WordLength );
+		return ( wordBase + byteOffset );
+	}
+	else
+	{
+		return index;
+	}
 }
 
 
@@ -220,12 +234,7 @@ void Serializer::Next( Serializer::ref_t type )
 	{
 		for ( uint32_t i = 0; i < type.size; ++i )
 		{
-			if ( m_endian == serializeEndian_t::BIG ) {
-				assert( 0 ); // FIXME: This is wrong. Reverses entire buffer not word
-				type.convert.u8.e[ type.size - 1 - i ] = m_bytes[ m_index ];
-			} else {
-				type.convert.u8.e[ i ] = m_bytes[ m_index ];
-			}
+			type.convert.u8.e[ i ] = m_bytes[ ApplyEndian( m_index ) ];
 			++m_index;
 		}
 	}
@@ -233,12 +242,7 @@ void Serializer::Next( Serializer::ref_t type )
 	{
 		for ( uint32_t i = 0; i < type.size; ++i )
 		{
-			if ( m_endian == serializeEndian_t::BIG ) {
-				assert( 0 ); // FIXME: This is wrong. Reverses entire buffer not word
-				m_bytes[ m_index ] = type.convert.u8.e[ type.size - 1 - i ];
-			} else {
-				m_bytes[ m_index ] = type.convert.u8.e[ i ];
-			}
+			m_bytes[ ApplyEndian( m_index ) ] = type.convert.u8.e[ i ];
 			++m_index;
 		}
 	}
@@ -256,24 +260,15 @@ void Serializer::NextArray( uint8_t* u8, uint32_t sizeInBytes )
 	if ( m_mode == serializeMode_t::LOAD ) {
 		for ( uint32_t i = 0; i < sizeInBytes; ++i )
 		{
-			if ( m_endian == serializeEndian_t::BIG ) {
-				assert(0); // FIXME: This is wrong. Reverses entire buffer not word
-				u8[ sizeInBytes - 1 - i ] = m_bytes[ m_index ];
-			} else {
-				u8[ i ] = m_bytes[ m_index ];
-			}
+			u8[ i ] = m_bytes[ ApplyEndian( m_index ) ];
 			++m_index;
 		}
 	}
-	else {
+	else if ( m_mode == serializeMode_t::STORE )
+	{
 		for ( uint32_t i = 0; i < sizeInBytes; ++i )
 		{
-			if ( m_endian == serializeEndian_t::BIG ) {
-				assert( 0 ); // FIXME: This is wrong. Reverses entire buffer not word
-				m_bytes[ m_index ] = u8[ sizeInBytes - 1 - i ];
-			} else {
-				m_bytes[ m_index ] = u8[ i ];
-			}
+			m_bytes[ ApplyEndian( m_index ) ] = u8[ i ];
 			++m_index;
 		}
 	}
