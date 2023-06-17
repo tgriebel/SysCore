@@ -21,9 +21,31 @@
 * SOFTWARE.
 */
 
-#pragma once
 #include <string>
+#include <fstream>
 
-bool FileExists( const std::string& path );
-void SplitFileName( const std::string& path, std::string& fileName, std::string& ext );
-void SplitPath( const std::string& path, std::string& directory, std::string& fileName );
+using namespace std;
+
+bool FileExists( const string& path )
+{
+	ifstream stream( path.c_str() );
+	const bool exist = stream.good();
+	stream.close();
+	return exist;
+}
+
+void SplitFileName( const string& path, string& fileName, string& ext )
+{
+	size_t extPos = path.find_last_of( "." );
+
+	fileName = path.substr( 0, extPos );
+	ext = path.substr( extPos + 1, path.length() );
+}
+
+
+void SplitPath( const string& path, string& directory, string& fileName )
+{
+	size_t dirPos = path.find_last_of( "\\" ) + 1;
+	directory = path.substr( 0, dirPos );
+	fileName = path.substr( dirPos, path.length() );
+}

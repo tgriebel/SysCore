@@ -152,6 +152,7 @@
   <ItemGroup>
     <ClCompile Include="serializer.cpp" />
     <ClCompile Include="SysCore.cpp" />
+    <ClCompile Include="systemUtils.cpp" />
     <ClCompile Include="timer.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
