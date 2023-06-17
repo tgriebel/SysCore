@@ -31,22 +31,24 @@
 
 uint8_t* Serializer::GetPtr()
 {
-	return bytes;
+	return m_bytes;
 }
 
 
 void Serializer::SetPosition( const uint32_t index )
 {
-	this->index = index;
+	m_index = index;
 }
 
 
 void Serializer::Clear( const bool clearMemory )
 {
-	if( clearMemory ) {
-		memset( bytes, 0, CurrentSize() );
+	if( clearMemory && ( m_bytes != nullptr ) ) {
+		memset( m_bytes, 0, BufferSize() );
 	}
+	memset( &m_header, 0, sizeof( serializerHeader_t ) );
 	SetPosition( 0 );
+	m_code = serializeStatus_t::OK;
 }
 
 
@@ -60,13 +62,13 @@ bool Serializer::ReadFile( const std::string& filename )
 
 	uint32_t fileSize = static_cast<uint32_t>( file.tellg() );
 	if( CanStore( fileSize ) == false ) {
-		if( Grow( fileSize - byteCount ) == false ) {
+		if( Grow( fileSize - m_byteCount ) == false ) {
 			return false;
 		}
 	}
 
 	file.seekg( 0 );
-	file.read( reinterpret_cast<char*>( bytes ), fileSize );
+	file.read( reinterpret_cast<char*>( m_bytes ), fileSize );
 	file.close();
 
 	return true;
@@ -77,10 +79,12 @@ bool Serializer::WriteFile( const std::string& filename )
 {
 	std::ofstream file( filename, std::ios::out | std::ios::trunc | std::ios::binary );
 
-	if ( !file.is_open() ) {
+	if ( !file.is_open() )
+	{
+		m_code = serializeStatus_t::FILE_ERROR;
 		return false;
 	}
-	file.write( reinterpret_cast<char*>(bytes), CurrentSize() );
+	file.write( reinterpret_cast<char*>( m_bytes ), CurrentSize() );
 	file.close();
 
 	return true;
@@ -90,38 +94,40 @@ bool Serializer::WriteFile( const std::string& filename )
 bool Serializer::Grow( const uint32_t sizeInBytes )
 {
 	if( sizeInBytes == 0 ) {
+		return true;
+	}
+
+	const uint64_t chkSize = m_byteCount + static_cast<uint64_t>( sizeInBytes );
+	if( chkSize >= static_cast<uint64_t>( MaxByteCount ) )
+	{
+		m_code = serializeStatus_t::FULL_ERROR;
 		return false;
 	}
 
-	const uint64_t chkSize = byteCount + static_cast<uint64_t>( sizeInBytes );
-	if( chkSize >= static_cast<uint64_t>( MaxByteCount ) ) {
-		return false;
-	}
+	const uint32_t oldCount = m_byteCount;
+	m_byteCount += sizeInBytes;
 
-	const uint32_t oldCount = byteCount;
-	byteCount += sizeInBytes;
-
-	uint8_t* newBytes = new uint8_t[ byteCount ];
-	if( bytes != nullptr ) {
-		memcpy( newBytes, bytes, oldCount );
-		delete[] bytes;
+	uint8_t* newBytes = new uint8_t[ m_byteCount ];
+	if( m_bytes != nullptr ) {
+		memcpy( newBytes, m_bytes, oldCount );
+		delete[] m_bytes;
 	}
 	memset( newBytes + oldCount, 0, sizeInBytes );
 
-	bytes = newBytes;
+	m_bytes = newBytes;
 	return true;
 }
 
 
 uint32_t Serializer::CurrentSize() const
 {
-	return index;
+	return m_index;
 }
 
 
 uint32_t Serializer::BufferSize() const
 {
-	return byteCount;
+	return m_byteCount;
 }
 
 
@@ -133,35 +139,43 @@ bool Serializer::CanStore( const uint32_t sizeInBytes ) const
 
 void Serializer::SetEndian( serializeEndian_t endianMode )
 {
-	endian = endianMode;
+	m_endian = endianMode;
 }
 
 
 bool Serializer::SetMode( serializeMode_t serializeMode )
 {
-	if( index > 0 ) {
+	if( m_index > 0 )
+	{
 		assert(0); // FIXME: temp
+		m_code = serializeStatus_t::MODE_ERROR;
 		return false;
 	}
-	mode = serializeMode;
+	m_mode = serializeMode;
 	return true;
 }
 
 
 serializeMode_t Serializer::GetMode() const
 {
-	return mode;
+	return m_mode;
+}
+
+
+serializeStatus_t Serializer::Status() const
+{
+	return m_code;
 }
 
 
 uint32_t Serializer::NewLabel( const char name[ serializerHeader_t::MaxNameLength ] )
 {
-	const uint32_t sectionIx = header.sectionCount;
+	const uint32_t sectionIx = m_header.sectionCount;
 
-	serializerHeader_t::section_t& section = header.sections[ sectionIx ];
-	section.offset = index;
+	serializerHeader_t::section_t& section = m_header.sections[ sectionIx ];
+	section.offset = m_index;
 	strcpy_s< serializerHeader_t::MaxNameLength >( section.name, name );
-	++header.sectionCount;
+	++m_header.sectionCount;
 
 	return sectionIx;
 }
@@ -172,16 +186,16 @@ void Serializer::EndLabel( const char name[ serializerHeader_t::MaxNameLength ] 
 	serializerHeader_t::section_t* section;
 	if ( FindLabel( name, &section ) )
 	{
-		section->size = ( index - section->offset );
+		section->size = ( m_index - section->offset );
 	}
 }
 
 
 bool Serializer::FindLabel( const char name[ serializerHeader_t::MaxNameLength ], serializerHeader_t::section_t** outSection )
 {
-	for ( uint32_t i = 0; i < header.sectionCount; ++i )
+	for ( uint32_t i = 0; i < m_header.sectionCount; ++i )
 	{
-		serializerHeader_t::section_t& section = header.sections[ i ];
+		serializerHeader_t::section_t& section = m_header.sections[ i ];
 		if ( _strnicmp( name, section.name, serializerHeader_t::MaxNameLength ) == 0 )
 		{
 			*outSection = &section;
@@ -196,32 +210,36 @@ bool Serializer::FindLabel( const char name[ serializerHeader_t::MaxNameLength ]
 
 void Serializer::Next( Serializer::ref_t type )
 {
-	if ( CanStore( type.size ) == false ) {
-		throw std::runtime_error( "Serializer is full." );
+	if ( CanStore( type.size ) == false )
+	{
+		m_code = serializeStatus_t::BUFFER_OVERRUN_ERROR;
+		return;
 	}
 
-	if ( mode == serializeMode_t::LOAD )
+	if ( m_mode == serializeMode_t::LOAD )
 	{
 		for ( uint32_t i = 0; i < type.size; ++i )
 		{
-			if ( endian == serializeEndian_t::BIG ) {
-				type.convert.u8.e[ type.size - 1 - i ] = bytes[ index ];
+			if ( m_endian == serializeEndian_t::BIG ) {
+				assert( 0 ); // FIXME: This is wrong. Reverses entire buffer not word
+				type.convert.u8.e[ type.size - 1 - i ] = m_bytes[ m_index ];
 			} else {
-				type.convert.u8.e[ i ] = bytes[ index ];
+				type.convert.u8.e[ i ] = m_bytes[ m_index ];
 			}
-			++index;
+			++m_index;
 		}
 	}
-	else if( mode == serializeMode_t::STORE )
+	else if( m_mode == serializeMode_t::STORE )
 	{
 		for ( uint32_t i = 0; i < type.size; ++i )
 		{
-			if ( endian == serializeEndian_t::BIG ) {
-				bytes[ index ] = type.convert.u8.e[ type.size - 1 - i ];
+			if ( m_endian == serializeEndian_t::BIG ) {
+				assert( 0 ); // FIXME: This is wrong. Reverses entire buffer not word
+				m_bytes[ m_index ] = type.convert.u8.e[ type.size - 1 - i ];
 			} else {
-				bytes[ index ] = type.convert.u8.e[ i ];
+				m_bytes[ m_index ] = type.convert.u8.e[ i ];
 			}
-			++index;
+			++m_index;
 		}
 	}
 }
@@ -229,30 +247,34 @@ void Serializer::Next( Serializer::ref_t type )
 
 void Serializer::NextArray( uint8_t* u8, uint32_t sizeInBytes )
 {
-	if ( CanStore( sizeInBytes ) == false ) {
-		throw std::runtime_error( "Serializer is full." );
+	if ( CanStore( sizeInBytes ) == false )
+	{
+		m_code = serializeStatus_t::BUFFER_OVERRUN_ERROR;
+		return;
 	}
 
-	if ( mode == serializeMode_t::LOAD ) {
+	if ( m_mode == serializeMode_t::LOAD ) {
 		for ( uint32_t i = 0; i < sizeInBytes; ++i )
 		{
-			if ( endian == serializeEndian_t::BIG ) {
-				u8[ sizeInBytes - 1 - i ] = bytes[ index ];
+			if ( m_endian == serializeEndian_t::BIG ) {
+				assert(0); // FIXME: This is wrong. Reverses entire buffer not word
+				u8[ sizeInBytes - 1 - i ] = m_bytes[ m_index ];
 			} else {
-				u8[ i ] = bytes[ index ];
+				u8[ i ] = m_bytes[ m_index ];
 			}
-			++index;
+			++m_index;
 		}
 	}
 	else {
 		for ( uint32_t i = 0; i < sizeInBytes; ++i )
 		{
-			if ( endian == serializeEndian_t::BIG ) {
-				bytes[ index ] = u8[ sizeInBytes - 1 - i ];
+			if ( m_endian == serializeEndian_t::BIG ) {
+				assert( 0 ); // FIXME: This is wrong. Reverses entire buffer not word
+				m_bytes[ m_index ] = u8[ sizeInBytes - 1 - i ];
 			} else {
-				bytes[ index ] = u8[ i ];
+				m_bytes[ m_index ] = u8[ i ];
 			}
-			++index;
+			++m_index;
 		}
 	}
 }
