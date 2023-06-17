@@ -39,6 +39,15 @@ enum class serializeEndian_t
 	BIG,
 };
 
+enum class serializeStatus_t : uint32_t
+{
+	OK,
+	FILE_ERROR,
+	FULL_ERROR,
+	MODE_ERROR,
+	BUFFER_OVERRUN_ERROR,
+};
+
 union Convert
 {
 	Convert() : u64(0) {}
@@ -199,24 +208,24 @@ public:
 
 	Serializer( const uint32_t _sizeInBytes, serializeMode_t _mode )
 	{
-		byteCount = std::min( MaxByteCount, _sizeInBytes );
-		if( byteCount > 0 ) {
-			bytes = new uint8_t[ _sizeInBytes ];
+		m_byteCount = std::min( MaxByteCount, _sizeInBytes );
+		if( m_byteCount > 0 ) {
+			m_bytes = new uint8_t[ _sizeInBytes ];
 		} else {
-			bytes = nullptr;
+			m_bytes = new uint8_t[ 1 ];
 		}
-		mode = _mode;
-		endian = serializeEndian_t::LITTLE;
+		m_mode = _mode;
+		m_endian = serializeEndian_t::LITTLE;
 		Clear();
 	}
 
 	~Serializer()
 	{
-		if ( bytes != nullptr ) {
-			delete[] bytes;
+		if ( m_bytes != nullptr ) {
+			delete[] m_bytes;
 		}
-		byteCount = 0;
-		mode = serializeMode_t::LOAD;
+		m_byteCount = 0;
+		m_mode = serializeMode_t::LOAD;
 		SetPosition( 0 );
 	}
 
@@ -224,18 +233,19 @@ public:
 	Serializer( const Serializer& ) = delete;
 	Serializer operator=( const Serializer& ) = delete;
 
-	uint8_t*			GetPtr();
-	void				SetPosition( const uint32_t index );
-	void				Clear( const bool clearMemory = true );
-	bool				ReadFile( const std::string& filename );
-	bool				WriteFile( const std::string& filename );
-	bool				Grow( const uint32_t sizeInBytes );
-	uint32_t			CurrentSize() const;
-	uint32_t			BufferSize() const;
-	bool				CanStore( const uint32_t sizeInBytes ) const;
-	void				SetEndian( serializeEndian_t endianMode );
-	bool				SetMode( serializeMode_t serializeMode );
-	serializeMode_t		GetMode() const;
+	uint8_t*				GetPtr();
+	void					SetPosition( const uint32_t index );
+	void					Clear( const bool clearMemory = true );
+	bool					ReadFile( const std::string& filename );
+	bool					WriteFile( const std::string& filename );
+	bool					Grow( const uint32_t sizeInBytes );
+	uint32_t				CurrentSize() const;
+	uint32_t				BufferSize() const;
+	bool					CanStore( const uint32_t sizeInBytes ) const;
+	void					SetEndian( serializeEndian_t endianMode );
+	bool					SetMode( serializeMode_t serializeMode );
+	serializeMode_t			GetMode() const;
+	serializeStatus_t		Status() const;
 
 	uint32_t			NewLabel( const char name[ serializerHeader_t::MaxNameLength ] );
 	void				EndLabel( const char name[ serializerHeader_t::MaxNameLength ] );
@@ -255,12 +265,13 @@ public:
 	void				NextArray( uint8_t* u8, uint32_t sizeInBytes );
 
 private:
-	serializerHeader_t	header;
-	uint8_t*			bytes;
-	uint32_t			byteCount;
-	uint32_t			index;
-	serializeMode_t		mode;
-	serializeEndian_t	endian;
+	serializerHeader_t		m_header;
+	uint8_t*				m_bytes;
+	uint32_t				m_byteCount;
+	uint32_t				m_index;
+	serializeMode_t			m_mode;
+	serializeEndian_t		m_endian;
+	serializeStatus_t		m_code;
 };
 
 template<class T>
