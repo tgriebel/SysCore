@@ -258,18 +258,34 @@ void Serializer::NextArray( uint8_t* u8, uint32_t sizeInBytes )
 	}
 
 	if ( m_mode == serializeMode_t::LOAD ) {
-		for ( uint32_t i = 0; i < sizeInBytes; ++i )
+		if ( m_endian == serializeEndian_t::BIG )
 		{
-			u8[ i ] = m_bytes[ ApplyEndian( m_index ) ];
-			++m_index;
+			for ( uint32_t i = 0; i < sizeInBytes; ++i )
+			{
+				u8[ i ] = m_bytes[ ApplyEndian( m_index ) ];
+				++m_index;
+			}
+		}
+		else
+		{
+			memcpy( u8, m_bytes + m_index, sizeInBytes );
+			m_index += sizeInBytes;
 		}
 	}
 	else if ( m_mode == serializeMode_t::STORE )
 	{
-		for ( uint32_t i = 0; i < sizeInBytes; ++i )
+		if ( m_endian == serializeEndian_t::BIG )
 		{
-			m_bytes[ ApplyEndian( m_index ) ] = u8[ i ];
-			++m_index;
+			for ( uint32_t i = 0; i < sizeInBytes; ++i )
+			{
+				m_bytes[ ApplyEndian( m_index ) ] = u8[ i ];
+				++m_index;
+			}
+		}
+		else
+		{
+			memcpy( m_bytes + m_index, u8, sizeInBytes );
+			m_index += sizeInBytes;
 		}
 	}
 }
