@@ -23,6 +23,9 @@
 
 #include <string>
 #include <fstream>
+#if defined _MSC_VER
+#include<direct.h>
+#endif
 
 using namespace std;
 
@@ -33,6 +36,18 @@ bool FileExists( const string& path )
 	stream.close();
 	return exist;
 }
+
+
+bool MakeDirectory( const string& path )
+{
+#if defined _MSC_VER
+	return ( _mkdir( path.c_str() ) == 0 );
+#else
+	assert(0);
+	return false;
+#endif
+}
+
 
 void SplitFileName( const string& path, string& fileName, string& ext )
 {

@@ -25,5 +25,6 @@
 #include <string>
 
 bool FileExists( const std::string& path );
+bool MakeDirectory( const std::string& path );
 void SplitFileName( const std::string& path, std::string& fileName, std::string& ext );
 void SplitPath( const std::string& path, std::string& directory, std::string& fileName );
