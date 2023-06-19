@@ -273,3 +273,32 @@ void Serializer::NextArray( uint8_t* u8, uint32_t sizeInBytes )
 		}
 	}
 }
+
+
+void Serializer::NextString( std::string& str )
+{
+	
+	if ( m_mode == serializeMode_t::LOAD )
+	{
+		uint32_t length;
+		Next( length );
+		char* buffer = new char[ length + 1 ];
+	
+		NextArray( reinterpret_cast<uint8_t*>( buffer ), length );
+		buffer[ length ] = '\0';
+		str = buffer;
+		delete[] buffer;
+	}
+	else
+	{
+		uint32_t length = static_cast<uint32_t>( str.length() );
+		Next( length );
+		char* buffer = new char[ length + 1 ];
+		str.copy( buffer, length );
+		buffer[ length ] = '\0';
+
+		NextArray( reinterpret_cast<uint8_t*>( buffer ), length );
+		delete[] buffer;
+	}
+
+}

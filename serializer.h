@@ -266,6 +266,7 @@ public:
 	void					Next( uint64_t& value ) { Next( Ref( value ) ); }
 	void					Next( double& value )	{ Next( Ref( value ) ); }
 	void					NextArray( uint8_t* u8, uint32_t sizeInBytes );
+	void					NextString( std::string& str );
 
 private:
 	serializerHeader_t		m_header;
