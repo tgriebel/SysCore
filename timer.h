@@ -45,13 +45,41 @@ public:
 	void		Stop();
 
 	[[nodiscard]]
+	std::string	GetLabel() const;
+
+	[[nodiscard]]
 	uint64_t	GetElapsed() const;
 
 	[[nodiscard]]
 	uint64_t	GetCurrentElapsed() const;
 
-private:
+protected:
 	std::chrono::milliseconds	startTimeMs;
 	std::chrono::milliseconds	endTimeMs;
 	std::string					label;
 };
+
+
+typedef void( *scopedTimerLogCallback_t )( const Timer* );
+
+class ScopedLogTimer : public Timer
+{
+private:
+	scopedTimerLogCallback_t callback;
+
+public:
+	ScopedLogTimer( std::string _label, scopedTimerLogCallback_t _callback = nullptr )
+	{
+		label = _label;
+		callback = _callback;
+		Start();
+	}
+
+	~ScopedLogTimer()
+	{
+		if( callback != nullptr ) {
+			(*callback)( this );
+		}
+	}
+};
+

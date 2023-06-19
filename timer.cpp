@@ -26,6 +26,11 @@
 #include <chrono>
 using namespace std::chrono;
 
+std::string	Timer::GetLabel() const
+{
+	return label;
+}
+
 void Timer::Start()
 {
 	startTimeMs = duration_cast<milliseconds>( steady_clock::now().time_since_epoch() );
