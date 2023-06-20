@@ -23,6 +23,8 @@
 
 #include "timer.h"
 
+#include <iostream>
+#include <assert.h>
 #include <chrono>
 using namespace std::chrono;
 
@@ -54,4 +56,11 @@ uint64_t Timer::GetCurrentElapsed() const
 {
 	const milliseconds time = duration_cast<milliseconds>( steady_clock::now().time_since_epoch() );
 	return ( time - startTimeMs ).count();
+}
+
+
+void TimerPrint( const Timer* timer )
+{
+	assert( timer != nullptr );
+	std::cout << "Timer(" << timer->GetLabel() << "): " << timer->GetCurrentElapsed() << "ms" << std::endl;
 }

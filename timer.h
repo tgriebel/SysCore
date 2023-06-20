@@ -83,3 +83,6 @@ public:
 	}
 };
 
+void TimerPrint( const Timer* timer );
+
+#define SCOPED_TIMER_PRINT( label ) ScopedLogTimer scopedTimer_##label( #label, &TimerPrint );
