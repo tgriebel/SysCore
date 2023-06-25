@@ -249,6 +249,7 @@ public:
 	bool					SetMode( serializeMode_t serializeMode );
 	serializeMode_t			GetMode() const;
 	serializeStatus_t		Status() const;
+	uint32_t				Hash() const;
 
 	uint32_t				NewLabel( const char name[ serializerHeader_t::MaxNameLength ] );
 	void					EndLabel( const char name[ serializerHeader_t::MaxNameLength ] );

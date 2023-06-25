@@ -28,6 +28,7 @@
 #include <sstream>
 #include "serializer.h"
 #include "assert.h"
+#include "common.h"
 
 uint8_t* Serializer::GetPtr()
 {
@@ -164,6 +165,12 @@ serializeMode_t Serializer::GetMode() const
 serializeStatus_t Serializer::Status() const
 {
 	return m_code;
+}
+
+
+uint32_t Serializer::Hash() const
+{
+	return SysCore::Hash( m_bytes, CurrentSize() );
 }
 
 
