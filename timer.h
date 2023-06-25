@@ -26,37 +26,56 @@
 #include <string>
 #include <chrono>
 
+enum timerPrecision_t
+{
+	NANOSECOND,
+	MICROSECOND,
+	MILLISECOND,
+	SECOND,
+};
+
+
 class Timer
 {
+protected:
+	std::chrono::nanoseconds	m_startTime;
+	std::chrono::nanoseconds	m_endTime;
+	std::string					m_label;
+	timerPrecision_t			m_precision;
+
+	uint64_t Convert( const std::chrono::nanoseconds& start, const std::chrono::nanoseconds& end ) const;
+
 public:
+
 	Timer()
 	{
-		label = "";
+		m_label = "";
+		m_precision = MILLISECOND;
 		Start();
 	}
 
-	Timer( std::string _label )
+	Timer( std::string label, const timerPrecision_t precision = MILLISECOND )
 	{
-		label = _label;
+		m_label = label;
+		m_precision = precision;
 		Start();
 	}
 
-	void		Start();
-	void		Stop();
+	void				Start();
+	void				Stop();
+	void				SetPrecision( const timerPrecision_t precision );
+	
+	[[nodiscard]]
+	timerPrecision_t	GetPrecision() const;
 
 	[[nodiscard]]
-	std::string	GetLabel() const;
+	std::string			GetLabel() const;
 
 	[[nodiscard]]
-	uint64_t	GetElapsed() const;
+	uint64_t			GetElapsed() const;
 
 	[[nodiscard]]
-	uint64_t	GetCurrentElapsed() const;
-
-protected:
-	std::chrono::milliseconds	startTimeMs;
-	std::chrono::milliseconds	endTimeMs;
-	std::string					label;
+	uint64_t			GetCurrentElapsed() const;
 };
 
 
@@ -65,20 +84,20 @@ typedef void( *scopedTimerLogCallback_t )( const Timer* );
 class ScopedLogTimer : public Timer
 {
 private:
-	scopedTimerLogCallback_t callback;
+	scopedTimerLogCallback_t m_callback;
 
 public:
-	ScopedLogTimer( std::string _label, scopedTimerLogCallback_t _callback = nullptr )
+	ScopedLogTimer( std::string label, scopedTimerLogCallback_t callback = nullptr )
 	{
-		label = _label;
-		callback = _callback;
+		m_label = label;
+		m_callback = callback;
 		Start();
 	}
 
 	~ScopedLogTimer()
 	{
-		if( callback != nullptr ) {
-			(*callback)( this );
+		if( m_callback != nullptr ) {
+			(*m_callback )( this );
 		}
 	}
 };

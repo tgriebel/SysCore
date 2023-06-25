@@ -28,39 +28,80 @@
 #include <chrono>
 using namespace std::chrono;
 
+uint64_t Timer::Convert( const std::chrono::nanoseconds& start, const std::chrono::nanoseconds& end ) const
+{
+	if ( m_precision == NANOSECOND ) {
+		return duration_cast<nanoseconds>( end - start ).count();
+	}
+	if ( m_precision == MICROSECOND ) {
+		return duration_cast<microseconds>( end - start ).count();
+	}
+	if ( m_precision == MILLISECOND ) {
+		return duration_cast<milliseconds>( end - start ).count();
+	}
+	if ( m_precision == SECOND ) {
+		return duration_cast<seconds>( end - start ).count();
+	}
+}
+
+
+timerPrecision_t Timer::GetPrecision() const
+{
+	return m_precision;
+}
+
+
 std::string	Timer::GetLabel() const
 {
-	return label;
+	return m_label;
 }
+
 
 void Timer::Start()
 {
-	startTimeMs = duration_cast<milliseconds>( steady_clock::now().time_since_epoch() );
-	endTimeMs = startTimeMs;
+	m_startTime = duration_cast<nanoseconds>( steady_clock::now().time_since_epoch() );
+	m_endTime = m_startTime;
 }
 
 
 void Timer::Stop()
 {
-	endTimeMs = duration_cast<milliseconds>( steady_clock::now().time_since_epoch() );
+	m_endTime = duration_cast<nanoseconds>( steady_clock::now().time_since_epoch() );
 }
 
 
 uint64_t Timer::GetElapsed() const
 {
-	return ( endTimeMs - startTimeMs ).count();
+	return Convert( m_startTime, m_endTime );
+}
+
+
+void Timer::SetPrecision( const timerPrecision_t precision )
+{
+	m_precision = precision;
 }
 
 
 uint64_t Timer::GetCurrentElapsed() const
 {
-	const milliseconds time = duration_cast<milliseconds>( steady_clock::now().time_since_epoch() );
-	return ( time - startTimeMs ).count();
+	const nanoseconds time = duration_cast<nanoseconds>( steady_clock::now().time_since_epoch() );
+	return Convert( m_startTime, time );
 }
 
 
 void TimerPrint( const Timer* timer )
 {
 	assert( timer != nullptr );
-	std::cout << "Timer(" << timer->GetLabel() << "): " << timer->GetCurrentElapsed() << "ms" << std::endl;
+
+	const timerPrecision_t precision = timer->GetPrecision();
+	std::string precisionStr = "";
+	switch( precision )
+	{
+		case NANOSECOND: precisionStr = "ns"; break;
+		case MICROSECOND: precisionStr = "us"; break;
+		case MILLISECOND: precisionStr = "ms"; break;
+		case SECOND: precisionStr = "s"; break;
+	}
+	
+	std::cout << "Timer(" << timer->GetLabel() << "): " << timer->GetCurrentElapsed() << precisionStr << std::endl;
 }
