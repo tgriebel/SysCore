@@ -146,6 +146,7 @@
     <ClInclude Include="refCounter.h" />
     <ClInclude Include="serializer.h" />
     <ClInclude Include="smartPointer.h" />
+    <ClInclude Include="spinlock.h" />
     <ClInclude Include="systemUtils.h" />
     <ClInclude Include="timer.h" />
   </ItemGroup>
