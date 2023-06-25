@@ -64,3 +64,32 @@ inline enumType operator<<( const enumType lhs, const enumType rhs )									\
 {																										\
 	return static_cast<enumType>( static_cast<intType>( lhs ) << static_cast<intType>( rhs ) );			\
 }
+
+namespace SysCore
+{
+// Fowler–Noll–Vo Hash - fnv1a - 32bits
+// https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
+static inline uint32_t Hash( const uint8_t* bytes, const uint32_t sizeBytes ) {
+	uint32_t result = 2166136261;
+	const uint32_t prime = 16777619;
+	for ( uint32_t i = 0; i < sizeBytes; ++i ) {
+		result = ( result ^ bytes[ i ] ) * prime;
+	}
+	return result;
+}
+
+// Polynomial Rolling hash
+static inline uint64_t Hash( const std::string& s ) {
+	const int p = 31;
+	const int m = static_cast<int>( 1e9 + 9 );
+	uint64_t hash = 0;
+	uint64_t pN = 1;
+	const int stringLen = static_cast<int>( s.size() );
+	for ( int i = 0; i < stringLen; ++i )
+	{
+		hash = ( hash + ( s[ i ] - (uint64_t)'a' + 1ull ) * pN ) % m;
+		pN = ( pN * p ) % m;
+	}
+	return hash;
+}
+};
