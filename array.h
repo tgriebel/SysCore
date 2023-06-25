@@ -42,12 +42,35 @@ public:
 	}
 
 
-	inline void Resize( uint32_t newCount )
+	inline T& Resize( uint32_t newCount )
 	{
 		if( newCount > N ) {
 			newCount = N;
 		}
 		count = newCount;
+		return ( count == 0 ) ? elements[ 0 ] : elements[ count - 1 ];
+	}
+
+
+	inline T& Grow( const uint32_t addCount )
+	{
+		uint32_t newCount = addCount + count;
+		if ( newCount > N ) {
+			newCount = N;
+		}
+		count = newCount;
+		return ( count == 0 ) ? elements[ 0 ] : elements[ count - 1 ];
+	}
+
+
+	inline T& Shrink( const uint32_t subCount )
+	{
+		if ( subCount >= count ) {
+			count = 0;
+		} else {
+			count -= subCount;
+		}
+		return ( count == 0 ) ? elements[ 0 ] : elements[ count - 1 ];
 	}
 
 
