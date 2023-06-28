@@ -42,6 +42,7 @@ uint64_t Timer::Convert( const std::chrono::nanoseconds& start, const std::chron
 	if ( m_precision == SECOND ) {
 		return duration_cast<seconds>( end - start ).count();
 	}
+	return duration_cast<nanoseconds>( end - start ).count();
 }
 
 
