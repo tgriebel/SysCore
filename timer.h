@@ -26,7 +26,7 @@
 #include <string>
 #include <chrono>
 
-enum timerPrecision_t
+enum class timerPrecision_t : uint32_t
 {
 	NANOSECOND,
 	MICROSECOND,
@@ -50,11 +50,11 @@ public:
 	Timer()
 	{
 		m_label = "";
-		m_precision = MILLISECOND;
+		m_precision = timerPrecision_t::MILLISECOND;
 		Start();
 	}
 
-	Timer( std::string label, const timerPrecision_t precision = MILLISECOND )
+	Timer( std::string label, const timerPrecision_t precision = timerPrecision_t::MILLISECOND )
 	{
 		m_label = label;
 		m_precision = precision;
@@ -87,10 +87,11 @@ private:
 	scopedTimerLogCallback_t m_callback;
 
 public:
-	ScopedLogTimer( std::string label, scopedTimerLogCallback_t callback = nullptr )
+	ScopedLogTimer( std::string label, const timerPrecision_t precision = timerPrecision_t::MILLISECOND, scopedTimerLogCallback_t callback = nullptr )
 	{
 		m_label = label;
 		m_callback = callback;
+		m_precision = precision;
 		Start();
 	}
 
@@ -104,4 +105,4 @@ public:
 
 void TimerPrint( const Timer* timer );
 
-#define SCOPED_TIMER_PRINT( label ) ScopedLogTimer scopedTimer_##label( #label, &TimerPrint );
+#define SCOPED_TIMER_PRINT( label ) ScopedLogTimer scopedTimer_##label( #label, timerPrecision_t::MILLISECOND, &TimerPrint );
