@@ -26,6 +26,7 @@
 #if defined _MSC_VER
 #include<direct.h>
 #endif
+#include <vector>
 
 using namespace std;
 
@@ -63,4 +64,42 @@ void SplitPath( const string& path, string& directory, string& fileName )
 	size_t dirPos = path.find_last_of( "\\" ) + 1;
 	directory = path.substr( 0, dirPos );
 	fileName = path.substr( dirPos, path.length() );
+}
+
+
+std::vector<char> ReadBinaryFile( const std::string& filename )
+{
+	std::ifstream file( filename, std::ios::ate | std::ios::binary );
+
+	if ( !file.is_open() ) {
+		throw std::runtime_error( "Failed to open file!" );
+	}
+
+	size_t fileSize = (size_t)file.tellg();
+	std::vector<char> buffer( fileSize );
+
+	file.seekg( 0 );
+	file.read( buffer.data(), fileSize );
+	file.close();
+
+	return buffer;
+}
+
+
+std::vector<char> ReadTextFile( const std::string& filename )
+{
+	std::ifstream file( filename, std::ios::ate );
+
+	if ( !file.is_open() ) {
+		throw std::runtime_error( "Failed to open file!" );
+	}
+
+	size_t fileSize = (size_t)file.tellg();
+	std::vector<char> buffer( fileSize );
+
+	file.seekg( 0 );
+	file.read( buffer.data(), fileSize );
+	file.close();
+
+	return buffer;
 }
