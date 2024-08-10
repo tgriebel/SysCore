@@ -63,6 +63,21 @@ inline enumType operator>>( const enumType lhs, const enumType rhs )									\
 inline enumType operator<<( const enumType lhs, const enumType rhs )									\
 {																										\
 	return static_cast<enumType>( static_cast<intType>( lhs ) << static_cast<intType>( rhs ) );			\
+}																										\
+																										\
+inline bool operator==( const enumType lhs, const enumType rhs )										\
+{																										\
+	return static_cast<intType>( lhs ) == static_cast<intType>( rhs );									\
+}																										\
+																										\
+inline bool operator!=( const enumType lhs, const enumType rhs )										\
+{																										\
+	return static_cast<intType>( lhs ) != static_cast<intType>( rhs );									\
+}																										\
+																										\
+inline bool operator<( const intType lhs, const enumType rhs )											\
+{																										\
+	return lhs < static_cast<intType>( rhs );															\
 }
 
 namespace SysCore
