@@ -23,6 +23,7 @@
 
 #include <string>
 #include <fstream>
+#include <assert.h>
 #if defined _MSC_VER
 #include<direct.h>
 #endif
@@ -64,6 +65,48 @@ void SplitPath( const string& path, string& directory, string& fileName )
 	size_t dirPos = path.find_last_of( "\\" ) + 1;
 	directory = path.substr( 0, dirPos );
 	fileName = path.substr( dirPos, path.length() );
+}
+
+
+void LeftTrim( std::string& s )
+{
+	s.erase( s.begin(), std::find_if( s.begin(), s.end(), []( unsigned char ch ) {
+		return !std::isspace( ch );
+		} ) );
+}
+
+
+void RightTrim( std::string& s )
+{
+	s.erase( std::find_if( s.rbegin(), s.rend(), []( unsigned char ch ) {
+		return !std::isspace( ch );
+		} ).base(), s.end() );
+}
+
+
+void Trim( std::string& s )
+{
+	LeftTrim( s );
+	RightTrim( s );
+}
+
+
+bool Equals( const std::string& str0, const std::string& str1 )
+{
+	return str0.compare( str1 ) == 0;
+}
+
+
+bool HasPrefix( const std::string& str0, const std::string& str1 )
+{
+	return str0.find( str1 ) == 0;
+}
+
+
+bool HasSuffix( const std::string& str0, const std::string& str1 )
+{
+	assert( 0 ); // Untested
+	return str0.find( str1 ) == ( str0.size() - str1.size() );
 }
 
 
