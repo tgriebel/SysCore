@@ -28,6 +28,7 @@
 #include<direct.h>
 #endif
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -76,6 +77,14 @@ void LeftTrim( std::string& s )
 }
 
 
+std::string LeftTrim( const std::string& s )
+{
+	std::string trimmed = s;
+	LeftTrim( trimmed );
+	return trimmed;
+}
+
+
 void RightTrim( std::string& s )
 {
 	s.erase( std::find_if( s.rbegin(), s.rend(), []( unsigned char ch ) {
@@ -84,10 +93,60 @@ void RightTrim( std::string& s )
 }
 
 
+std::string RightTrim( const std::string& s )
+{
+	std::string trimmed = s;
+	RightTrim( trimmed );
+	return trimmed;
+}
+
+
 void Trim( std::string& s )
 {
 	LeftTrim( s );
 	RightTrim( s );
+}
+
+
+std::string Trim( const std::string& s )
+{
+	std::string trimmed = s;
+	Trim( trimmed );
+	return trimmed;
+}
+
+
+void ToLower( std::string& s )
+{
+	std::transform( s.begin(), s.end(), s.begin(), []( unsigned char c )
+		{
+			return std::tolower( c );
+		} );
+}
+
+
+std::string ToLower( const std::string& s )
+{
+	std::string lower = s;
+	ToLower( lower );
+	return lower;
+}
+
+
+void ToUpper( std::string& s )
+{
+	std::transform( s.begin(), s.end(), s.begin(), []( unsigned char c )
+		{
+			return std::toupper( c );
+		} );
+}
+
+
+std::string ToUpper( const std::string& s )
+{
+	std::string upper = s;
+	ToUpper( upper );
+	return upper;
 }
 
 
