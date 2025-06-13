@@ -78,6 +78,17 @@ inline bool operator!=( const enumType lhs, const enumType rhs )										\
 inline bool operator<( const intType lhs, const enumType rhs )											\
 {																										\
 	return lhs < static_cast<intType>( rhs );															\
+}																										\
+																										\
+inline bool HasFlags( const enumType& flags, const enumType compareFlags )								\
+{																										\
+	return ( static_cast<intType>( flags & compareFlags ) != 0 );										\
+}																										\
+																										\
+inline void ClearFlags( enumType& flags0, const enumType flags )										\
+{																										\
+	intType result = static_cast<intType>( flags ) & ~static_cast<intType>( flags );					\
+	flags0 = static_cast<enumType>( result );															\
 }
 
 namespace SysCore
