@@ -164,7 +164,6 @@ bool HasPrefix( const std::string& str0, const std::string& str1 )
 
 bool HasSuffix( const std::string& str0, const std::string& str1 )
 {
-	assert( 0 ); // Untested
 	return str0.find( str1 ) == ( str0.size() - str1.size() );
 }
 
