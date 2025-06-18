@@ -118,4 +118,11 @@ static inline uint64_t Hash( const std::string& s ) {
 	}
 	return hash;
 }
+
+static inline uint32_t Align( const uint64_t size, const uint64_t alignment )
+{
+	const uint32_t alignedSize = static_cast<uint32_t>( ( size + ( alignment - 1 ) ) & ~( alignment - 1 ) );
+	assert( ( alignedSize % alignment ) == 0 );
+	return alignedSize;
+}
 };
