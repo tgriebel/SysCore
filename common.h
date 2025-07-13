@@ -87,13 +87,13 @@ inline bool HasFlags( const enumType& flags, const enumType compareFlags )						
 																										\
 inline void SetFlags( enumType& flags0, const enumType flags )											\
 {																										\
-	intType result = static_cast<intType>( flags ) | static_cast<intType>( flags );						\
+	intType result = static_cast<intType>( flags0 ) | static_cast<intType>( flags );					\
 	flags0 = static_cast<enumType>( result );															\
 }																										\
 																										\
 inline void ClearFlags( enumType& flags0, const enumType flags )										\
 {																										\
-	intType result = static_cast<intType>( flags ) & ~static_cast<intType>( flags );					\
+	intType result = static_cast<intType>( flags0 ) & ~static_cast<intType>( flags );					\
 	flags0 = static_cast<enumType>( result );															\
 }
 
