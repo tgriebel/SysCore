@@ -140,6 +140,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="array.h" />
+    <ClInclude Include="bitArray.h" />
     <ClInclude Include="common.h" />
     <ClInclude Include="jsmn.h" />
     <ClInclude Include="ref.h" />
@@ -151,6 +152,7 @@
     <ClInclude Include="timer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="bitArray.cpp" />
     <ClCompile Include="serializer.cpp" />
     <ClCompile Include="SysCore.cpp" />
     <ClCompile Include="systemUtils.cpp" />

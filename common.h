@@ -24,6 +24,7 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 
 const uint32_t KB_1 = 1024;
 const uint32_t MB_1 = 1024 * KB_1;
@@ -130,5 +131,15 @@ static inline uint32_t Align( const uint64_t size, const uint64_t alignment )
 	const uint32_t alignedSize = static_cast<uint32_t>( ( size + ( alignment - 1 ) ) & ~( alignment - 1 ) );
 	assert( ( alignedSize % alignment ) == 0 );
 	return alignedSize;
+}
+
+static inline uint32_t Popcount( const uint64_t value )
+{
+	uint64_t x = value;
+
+	x = x - ( ( x >> 1 ) & 0x5555555555555555ull );
+	x = ( x & 0x3333333333333333ull ) + ( ( x >> 2 ) & 0x3333333333333333ull );
+	x = ( x + ( x >> 4 ) ) & 0x0F0F0F0F0F0F0F0Full;
+	return ( x * 0x0101010101010101ull ) >> 56;
 }
 };
