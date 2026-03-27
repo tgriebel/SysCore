@@ -126,12 +126,27 @@ static inline uint64_t Hash( const std::string& s ) {
 	return hash;
 }
 
+
 static inline uint32_t Align( const uint64_t size, const uint64_t alignment )
 {
 	const uint32_t alignedSize = static_cast<uint32_t>( ( size + ( alignment - 1 ) ) & ~( alignment - 1 ) );
 	assert( ( alignedSize % alignment ) == 0 );
 	return alignedSize;
 }
+
+
+static inline uint32_t RoundUpToPowerOfTwo( uint32_t value )
+{
+	if ( value == 0 ) return 1;
+	--value;
+	value |= value >> 1;
+	value |= value >> 2;
+	value |= value >> 4;
+	value |= value >> 8;
+	value |= value >> 16;
+	return ++value;
+}
+
 
 static inline uint32_t Popcount( const uint64_t value )
 {
