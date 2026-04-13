@@ -23,6 +23,7 @@
 
 #pragma once
 #include <string>
+#include <vector>
 
 bool				FileExists( const std::string& path );
 bool				MakeDirectory( const std::string& path );
