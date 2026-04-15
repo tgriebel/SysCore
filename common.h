@@ -10,6 +10,9 @@ const uint32_t GB_1 = 1024 * MB_1;
 #define KB( N ) ( N * KB_1 )
 #define MB( N ) ( N * MB_1 )
 #define GB( N ) ( N * GB_1 )
+#define BYTES_TO_KB( N ) ( N / static_cast<float>( KB_1 ) )
+#define BYTES_TO_MB( N ) ( N / static_cast<float>( MB_1 ) )
+#define BYTES_TO_GB( N ) ( N / static_cast<float>( GB_1 ) )
 #define COUNTARRAY( ary ) static_cast<uint32_t>( sizeof( ary ) / sizeof( ary[0] ) )
 
 #define DEFINE_ENUM_OPERATORS( enumType, intType )														\
