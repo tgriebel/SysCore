@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <string>
+#include <cassert>
 
 const uint32_t KB_1 = 1024;
 const uint32_t MB_1 = 1024 * KB_1;
