@@ -2,6 +2,9 @@
 #include <string>
 #include <vector>
 
+namespace SysCore
+{
+
 bool				FileExists( const std::string& path );
 bool				MakeDirectory( const std::string& path );
 void				SplitFileName( const std::string& path, std::string& fileName, std::string& ext );
@@ -21,3 +24,5 @@ bool				HasPrefix( const std::string& str0, const std::string& str1 );
 bool				HasSuffix( const std::string& str0, const std::string& str1 );
 std::vector<char>	ReadTextFile( const std::string& filename );
 std::vector<char>	ReadBinaryFile( const std::string& filename );
+
+}

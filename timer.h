@@ -3,6 +3,9 @@
 #include <string>
 #include <chrono>
 
+namespace SysCore
+{
+
 enum class timerPrecision_t : uint32_t
 {
 	NANOSECOND,
@@ -41,7 +44,7 @@ public:
 	void				Start();
 	void				Stop();
 	void				SetPrecision( const timerPrecision_t precision );
-	
+
 	[[nodiscard]]
 	timerPrecision_t	GetPrecision() const;
 
@@ -75,11 +78,11 @@ public:
 	~ScopedLogTimer()
 	{
 		if( m_callback != nullptr ) {
-			(*m_callback )( this );
+			( *m_callback )( this );
 		}
 	}
 };
 
 void TimerPrint( const Timer* timer );
-
-#define SCOPED_TIMER_PRINT( label ) ScopedLogTimer scopedTimer_##label( #label, timerPrecision_t::MILLISECOND, &TimerPrint );
+}
+#define SCOPED_TIMER_PRINT( label, timeUnit ) SysCore::ScopedLogTimer scopedTimer_##label( #label, SysCore::timerPrecision_t::timeUnit, &SysCore::TimerPrint );

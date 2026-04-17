@@ -6,8 +6,12 @@
 #endif
 #include <vector>
 #include <algorithm>
+#include <filesystem>
 
 using namespace std;
+
+namespace SysCore
+{
 
 bool FileExists( const string& path )
 {
@@ -23,7 +27,7 @@ bool MakeDirectory( const string& path )
 #if defined _MSC_VER
 	return ( _mkdir( path.c_str() ) == 0 );
 #else
-	assert(0);
+	assert( 0 );
 	return false;
 #endif
 }
@@ -95,9 +99,8 @@ std::string Trim( const std::string& s )
 
 void ToLower( std::string& s )
 {
-	std::transform( s.begin(), s.end(), s.begin(), []( unsigned char c )
-		{
-			return std::tolower( c );
+	std::transform( s.begin(), s.end(), s.begin(), []( unsigned char c ) {
+		return std::tolower( c );
 		} );
 }
 
@@ -112,9 +115,8 @@ std::string ToLower( const std::string& s )
 
 void ToUpper( std::string& s )
 {
-	std::transform( s.begin(), s.end(), s.begin(), []( unsigned char c )
-		{
-			return std::toupper( c );
+	std::transform( s.begin(), s.end(), s.begin(), []( unsigned char c ) {
+		return std::toupper( c );
 		} );
 }
 
@@ -149,11 +151,11 @@ std::vector<char> ReadBinaryFile( const std::string& filename )
 {
 	std::ifstream file( filename, std::ios::ate | std::ios::binary );
 
-	if ( !file.is_open() ) {
+	if( !file.is_open() ) {
 		throw std::runtime_error( "Failed to open file!" );
 	}
 
-	size_t fileSize = (size_t)file.tellg();
+	size_t fileSize = ( size_t )file.tellg();
 	std::vector<char> buffer( fileSize );
 
 	file.seekg( 0 );
@@ -168,11 +170,11 @@ std::vector<char> ReadTextFile( const std::string& filename )
 {
 	std::ifstream file( filename, std::ios::ate );
 
-	if ( !file.is_open() ) {
+	if( !file.is_open() ) {
 		throw std::runtime_error( "Failed to open file!" );
 	}
 
-	size_t fileSize = (size_t)file.tellg();
+	size_t fileSize = ( size_t )file.tellg();
 	std::vector<char> buffer( fileSize );
 
 	file.seekg( 0 );
@@ -180,4 +182,6 @@ std::vector<char> ReadTextFile( const std::string& filename )
 	file.close();
 
 	return buffer;
+}
+
 }

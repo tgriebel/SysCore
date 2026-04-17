@@ -82,7 +82,8 @@ namespace SysCore
 {
 // Fowler�Noll�Vo Hash - fnv1a - 32bits
 // https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
-static inline uint32_t Hash( const uint8_t* bytes, const uint32_t sizeBytes ) {
+static inline uint32_t Hash( const uint8_t* bytes, const uint32_t sizeBytes )
+{
 	uint32_t result = 2166136261;
 	const uint32_t prime = 16777619;
 	for ( uint32_t i = 0; i < sizeBytes; ++i ) {
@@ -92,7 +93,8 @@ static inline uint32_t Hash( const uint8_t* bytes, const uint32_t sizeBytes ) {
 }
 
 // Polynomial Rolling hash
-static inline uint64_t Hash( const std::string& s ) {
+static inline uint64_t Hash( const std::string& s )
+{
 	const int p = 31;
 	const int m = static_cast<int>( 1e9 + 9 );
 	uint64_t hash = 0;
