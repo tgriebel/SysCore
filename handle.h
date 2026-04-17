@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <cstdint>
+#include <iomanip>
 #include <sstream>
 #include <string>
 
@@ -72,7 +73,7 @@ public:
 	std::string String() const
 	{
 		std::stringstream ss;
-		ss << Get();
+		ss << std::hex << std::setw( 2 * sizeof( T ) ) << std::setfill( '0' ) << Get();
 		return ss.str();
 	}
 
