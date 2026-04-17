@@ -80,9 +80,9 @@ inline void ClearFlags( enumType& flags0, const enumType flags )										\
 
 namespace SysCore
 {
-// Fowler�Noll�Vo Hash - fnv1a - 32bits
+// Fowler-Noll-Vo Hash - fnv1a - 32bits
 // https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
-static inline uint32_t Hash( const uint8_t* bytes, const uint32_t sizeBytes )
+static inline uint32_t Hash32( const uint8_t* bytes, const uint32_t sizeBytes )
 {
 	uint32_t result = 2166136261;
 	const uint32_t prime = 16777619;
@@ -91,6 +91,19 @@ static inline uint32_t Hash( const uint8_t* bytes, const uint32_t sizeBytes )
 	}
 	return result;
 }
+
+
+// Fowler-Noll-Vo Hash - fnv1a - 64bits
+static inline uint64_t Hash( const uint8_t* bytes, const uint64_t sizeBytes )
+{
+	uint64_t result = 14695981039346656037ULL;
+	const uint64_t prime = 1099511628211ULL;
+	for( uint64_t i = 0; i < sizeBytes; ++i ) {
+		result = ( result ^ bytes[ i ] ) * prime;
+	}
+	return result;
+}
+
 
 // Polynomial Rolling hash
 static inline uint64_t Hash( const std::string& s )

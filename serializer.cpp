@@ -145,7 +145,7 @@ serializeStatus_t Serializer::Status() const
 }
 
 
-uint32_t Serializer::Hash() const
+uint64_t Serializer::Hash() const
 {
 	return SysCore::Hash( m_bytes, CurrentSize() );
 }
