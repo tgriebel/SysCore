@@ -73,7 +73,7 @@ public:
 	std::string String() const
 	{
 		std::stringstream ss;
-		ss << std::hex << std::setw( 2 * sizeof( T ) ) << std::setfill( '0' ) << Get();
+		ss << std::setw( 2 * sizeof( T ) ) << std::setfill( '0' ) << Get();
 		return ss.str();
 	}
 
