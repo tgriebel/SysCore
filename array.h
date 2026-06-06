@@ -11,6 +11,8 @@ private:
 	uint32_t	count;
 public:
 
+	static const uint32_t Capacity = N;
+
 	Array() : count( 0 )
 	{}
 
@@ -98,11 +100,5 @@ public:
 	inline uint32_t Count() const
 	{
 		return count;
-	}
-
-
-	inline uint32_t Capacity() const
-	{
-		return N;
 	}
 };
