@@ -9,6 +9,7 @@ bool				FileExists( const std::string& path );
 bool				MakeDirectory( const std::string& path );
 void				SplitFileName( const std::string& path, std::string& fileName, std::string& ext );
 void				SplitPath( const std::string& path, std::string& directory, std::string& fileName );
+std::string			MakeRelative( const std::string& path, const std::string& root );
 void				LeftTrim( std::string& s );
 std::string			LeftTrim( const std::string& s );
 void				RightTrim( std::string& s );

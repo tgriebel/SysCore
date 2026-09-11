@@ -50,6 +50,12 @@ void SplitPath( const string& path, string& directory, string& fileName )
 }
 
 
+string MakeRelative( const string& path, const string& root )
+{
+	return filesystem::relative( path, filesystem::absolute( root ) ).generic_string();
+}
+
+
 void LeftTrim( std::string& s )
 {
 	s.erase( s.begin(), std::find_if( s.begin(), s.end(), []( unsigned char ch ) {
