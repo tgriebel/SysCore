@@ -33,6 +33,13 @@ bool MakeDirectory( const string& path )
 }
 
 
+bool CloneFile( const string& srcPath, const string& dstPath )
+{
+	error_code ec;
+	return filesystem::copy_file( srcPath, dstPath, ec );
+}
+
+
 void SplitFileName( const string& path, string& fileName, string& ext )
 {
 	size_t extPos = path.find_last_of( "." );

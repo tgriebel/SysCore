@@ -7,6 +7,7 @@ namespace SysCore
 
 bool				FileExists( const std::string& path );
 bool				MakeDirectory( const std::string& path );
+bool				CloneFile( const std::string& srcPath, const std::string& dstPath );
 void				SplitFileName( const std::string& path, std::string& fileName, std::string& ext );
 void				SplitPath( const std::string& path, std::string& directory, std::string& fileName );
 std::string			MakeRelative( const std::string& path, const std::string& root );
